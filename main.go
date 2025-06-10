@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 	"sync"
 	"time"
@@ -22,7 +21,7 @@ func generateRandomElements(size int) []int {
 	rand.NewSource(time.Now().UnixNano())
 	data := make([]int, size)
 	for i := 0; i < size; i++ {
-		data[i] = rand.Intn(900_000_000) // Генерируем случайные числа от 0 до 999999
+		data[i] = rand.Int() // Генерируем случайные числа от 0 до 999999
 	}
 	return data
 }
@@ -49,7 +48,7 @@ func maximum(data []int) int {
 // maxChunks returns the maximum number of elements in a chunks.
 func maxChunks(data []int) int {
 	if len(data) == 0 {
-		return math.MinInt // или panic/error
+		return 0 // или panic/error
 	}
 	if len(data) == 1 {
 		return data[0]
@@ -62,7 +61,7 @@ func maxChunks(data []int) int {
 
 	for i := 0; i < CHUNKS; i++ {
 		wg.Add(1)
-		go func(i int) {
+		go func(i int, slise []int) {
 			defer wg.Done()
 
 			start := i * chunkSize
@@ -71,13 +70,13 @@ func maxChunks(data []int) int {
 				end = len(data)
 			}
 			if start >= end { // На случай, если CHUNKS > len(data)
-				maxValues[i] = math.MinInt
+				maxValues[i] = 0
 				return
 			}
 
 			chunk := data[start:end]
 			maxValues[i] = maximum(chunk)
-		}(i)
+		}(i, data)
 	}
 	wg.Wait()
 
